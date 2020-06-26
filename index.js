@@ -160,7 +160,7 @@ app.post('/addadmin', (req, res) => {
 		// check if the recieved uid is inside the admins list
 
 		var isin = false
-		for (let i in ads)
+		for (var i in ads)
 			if (ads[i] == req.body.uid) {
 				isin = true
 				break
