@@ -185,7 +185,7 @@ app.post('/isadmin', (req, res) => {
 		var list = object[0].admins
 
 		var isAdmin = false
-		for (let i in list)
+		for (var i in list)
 			if (list[i] == req.body.uid){
 					isAdmin = true
 					break
