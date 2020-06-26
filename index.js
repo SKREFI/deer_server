@@ -4,6 +4,7 @@ const cors = require('cors');
 const Filter = require('bad-words');
 const rateLimit = require('express-rate-limit');
 const monk = require('monk');
+const log = require('./modules/logger')
 
 // CALLS
 const app = express();
@@ -35,13 +36,12 @@ function getList(json_list) {
 	return list
 }
 
-// POST called in client.js:82
+// POST called in client.js:266
 app.post('/delete', (req, res) => {
 	posts.findOneAndDelete({ _id: req.body._id })
-		// .then(doc => { res.json({ message: 'Post ' + req.body._id + ' removed.' }) })
+		.then(doc => { log.warn(req.body.uid + ' deleted post ' + req.body._id)})
 
 	comments.findOneAndDelete( { pid: req.body._id})
-
 	res.json({ message: req.body._id + ' deleted.' })
 })
 
@@ -61,6 +61,7 @@ app.post('/cool', (req, res) => {
 		res.status(406)
 		res.json({ message: 'already' })
 	} else {
+		log.info(me + ' liked post ' + uid)
 		likes.push(me)
 		if (mehs.includes(me))
 			mehs.splice(mehs.indexOf(me), 1)
@@ -85,6 +86,7 @@ app.post('/meh', (req, res) => {
 		res.status(406)
 		res.json({ message: 'already' })
 	} else {
+		log.info(me + ' disliked post ' + uid)
 		mehs.push(me)
 		if (likes.includes(me))
 			likes.splice(likes.indexOf(me), 1)
@@ -153,7 +155,6 @@ app.get('/comments', (req, res) => {
 
 app.post('/addadmin', (req, res) => {
 	// get the list of admins
-	console.log(req.body.uid)
 	admins.find().then(obj => {
 		// get the list
 		var ads = obj[0].admins
@@ -167,6 +168,7 @@ app.post('/addadmin', (req, res) => {
 			}
 
 		if (!isin){
+			log.warn(req.query.uid + ' added admin: ' + req.body.uid)
 			ads.push(req.body.uid)
 			admins.findOneAndUpdate( { _id: '5ef356f04594403ddc8a840c'}, { $set: { admins: ads}})
 			res.json('added')
@@ -196,12 +198,15 @@ app.post('/isadmin', (req, res) => {
 })
 
 app.get('/admins', (req, res) => {
+	log.info('User ' + req.query.uid + ' made a request to get the admins.')
+	
 	admins.find().then(obj => {
 		res.json(obj[0].admins)
 	})
 })
 
 app.get('/', (req, res) => {
+	console.log(req)
 	res.send('App running! Congrats! You good!')
 })
 
@@ -228,6 +233,7 @@ app.post('/post', (req, res) => {
 			posts.insert(package).then((createdPost) => {
 				res.json(createdPost);
 			});
+			log.info(package.uid + ' created a post with content: ' + package.content)
 			break;
 		case 'guest':
 			res.status(422);
@@ -238,6 +244,7 @@ app.post('/post', (req, res) => {
 			res.json({ message: 'Content too short.' });
 			break;
 		default:
+			log.error('Something failed when a user tried to make a post.')
 			res.status(500);
 			res.json({ message: 'Somthing failed.' });
 	}
