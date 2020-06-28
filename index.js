@@ -1,4 +1,6 @@
 // IMPORTS
+const https = require('https')
+const fs = require('fs')
 const express = require('express');
 const cors = require('cors');
 const Filter = require('bad-words');
@@ -216,7 +218,7 @@ app.use(
 		windowMs: 10 * 1000, //in ms, so 1 minute between requests
 		max: 1
 	})
-);
+)
 
 // POST Called in client.js:96
 app.post('/post', (req, res) => {
@@ -248,7 +250,7 @@ app.post('/post', (req, res) => {
 			res.status(500);
 			res.json({ message: 'Somthing failed.' });
 	}
-});
+})
 
 const server = app.listen(process.env.PORT || 8080, () => {
 	const host = server.address().address
@@ -256,5 +258,3 @@ const server = app.listen(process.env.PORT || 8080, () => {
 
 	console.log(`App listening at http://${host}:${port}`)
 });
-
-// posts.findOneAndDelete({_id: req.body._id}).then(doc => { res.json({message: 'Post ' + req.body._id + ' removed.'}) })
